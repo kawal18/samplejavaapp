@@ -43,7 +43,8 @@ stages {
 		    withCredentials([string(credentialsId: 'DOCKER_HUB_PWD', variable: 'DOCKER_HUB_PWD')]) {
 			    sh "docker login -u kawal18 -p ${DOCKER_HUB_PWD}"
 		    }
-		    sh 'docker push lerndevops/samplejavaapp:$BUILD_NUMBER'
+		    sh 'docker tag lerndevops/samplejavaapp:$BUILD_NUMBER kawal18/lerndevops:sampleapp'
+		    sh 'docker push kawal18/lerndevops:sampleapp'
 	    }
     }	
     stage('Deploy-QA') {
