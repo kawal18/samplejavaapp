@@ -36,22 +36,16 @@ stages {
 		    sh script: '/opt/maven/bin/mvn package'	
 	    }		
     }
-    stage('build docker image') {
-	   steps {
-	        sh 'cd $WORKSPACE'
-		sh 'docker build --file Dockerfile --tag lerndevops/samplejavaapp:$BUILD_NUMBER .'
-		sh 'docker tag lerndevops/samplejavaapp:$BUILD_NUMBER kawal18/lerndevops:latest'
-            }	
-        }
-        stage('push docker image') {
-	   steps {
-		withCredentials([string(credentialsId: 'DOCKER_HUB_PWD', variable: 'DOCKER_HUB_PWD')]) {
-                	sh "docker login -u lerndevops -p ${DOCKER_HUB_PWD}"
-			}
-		sh 'docker push lerndevops/samplejavaapp:$BUILD_NUMBER'
-		}
-        }
-	
+     stage('build & push docker image') {
+	    steps {
+		    sh 'cd $WORKSPACE'
+		    sh 'docker build --file Dockerfile --tag lerndevops/samplejavaapp:$BUILD_NUMBER .'
+		    withCredentials([string(credentialsId: 'DOCKER_HUB_PWD', variable: 'DOCKER_HUB_PWD')]) {
+			    sh "docker login -u kawal18 -p ${DOCKER_HUB_PWD}"
+		    }
+		    sh 'docker push lerndevops/samplejavaapp:$BUILD_NUMBER'
+	    }
+    }	
     stage('Deploy-QA') {
 	    steps {
 		    sh 'ansible-playbook --inventory /tmp/myinv deploy/deploy-kube.yml --extra-vars "env=qa build=$BUILD_NUMBER"'
