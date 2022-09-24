@@ -1,4 +1,4 @@
-- hosts: "{{ env }}"
+- hosts: "qa"
   become: yes
   tasks: 
     - name: Deploying Application pods...
