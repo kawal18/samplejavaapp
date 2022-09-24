@@ -36,17 +36,20 @@ stages {
 		    sh script: '/opt/maven/bin/mvn package'	
 	    }		
     }
-    stage('build & push docker image') {
-	    steps {
-		    sh 'cd $WORKSPACE'
-		    sh 'docker build --file Dockerfile --tag lerndevops/samplejavaapp:$BUILD_NUMBER .'
-		    withCredentials([usernamePassword(credentialsId: 'DOCKER_HUB_PWD', passwordVariable: 'PASSWORD', usernameVariable: 'USER')]) {
-			    sh "docker login -u $USER -p $PASSWORD https://registry.hub.docker.com/"
-			    sh "docker tag lerndevops/samplejavaapp:$BUILD_NUMBER kawal18/lerndevops:latest"
-		    }
-		    sh 'docker push kawal18/lerndevops:latest'
-	    }
-    }
+    stage('build docker image') {
+	   steps {
+	        sh 'cd $WORKSPACE'
+		sh 'docker build --file Dockerfile --tag lerndevops/samplejavaapp:$BUILD_NUMBER .'
+            }	
+        }
+    stage('push docker image') {
+	   steps {
+		withDockerRegistry(credentialsId: 'DOCKER_HUB_PWD', url: 'https://registry.hub.docker.com/')  {
+ 		sh 'docker push lerndevops/samplejavaapp:$BUILD_NUMBER'
+			}
+		}
+        }
+	
     stage('Deploy-QA') {
 	    steps {
 		    sh 'ansible-playbook --inventory /tmp/myinv deploy/deploy-kube.yml --extra-vars "env=qa build=$BUILD_NUMBER"'
