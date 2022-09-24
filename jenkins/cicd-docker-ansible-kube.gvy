@@ -43,11 +43,12 @@ stages {
 		sh 'docker tag lerndevops/samplejavaapp:$BUILD_NUMBER kawal18/lerndevops:latest'
             }	
         }
-    stage('push docker image') {
+        stage('push docker image') {
 	   steps {
-		withDockerRegistry(credentialsId: 'DOCKER_HUB_PWD', url: 'https://registry.hub.docker.com/')  {
- 		sh 'docker push kawal18/lerndevops:latest'
+		withCredentials([string(credentialsId: 'DOCKER_HUB_PWD', variable: 'DOCKER_HUB_PWD')]) {
+                	sh "docker login -u lerndevops -p ${DOCKER_HUB_PWD}"
 			}
+		sh 'docker push lerndevops/samplejavaapp:$BUILD_NUMBER'
 		}
         }
 	
